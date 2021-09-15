@@ -3,14 +3,15 @@ Language to Use: JAVA
 Author: Tyler Ziggas and Tyler Scott
 Date: September 10, 2021
 Class: Intro to Software Profession 4500
-Explanation:
-Central Data Structures:
+Explanation: This project is simulating a casino, asking in for the amount of slots and zeroes that will be used for conducting the bets.
+    It will also ask for how many visits you would like to make at the casino and also how many dollars to start with on each visit.
+    Lastly, we ask for which betting strategy between the martingale strategy, the random strategy, or the fixed bet strategy.  We then conduct
+    those games until you bust on that day or exceed the amount of times you are allowed to play for the day, then you are to continue the process
+    for each visit, when the program then lists the statistics for the visits you made.
 External Files: None
 Leaned how to generate a random number in a range using ThreadLocalRandom from:
-https://stackoverflow.com/questions/363681/how-do-i-generate-random-integers-within-a-specific-range-in-java
+    https://stackoverflow.com/questions/363681/how-do-i-generate-random-integers-within-a-specific-range-in-java
 */
-
-package softwarehw2;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -18,10 +19,9 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SoftwareHW2 { // Going to have to change this to Main and delete the package line for it to work in onlinegdb
+public class Main { // Going to have to change this to Main and delete the package line for it to work in onlinegdb
 
-    // You can make these pass into functions if you want, it probably isn't best to make them global but these are the stats to show
-    static int initialSlots;
+    static int initialSlots; // Our statistics to keep track of
     static int initialZeroes;
     static int initialVisits;
     static int initialDollars;
@@ -35,14 +35,13 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
     static int moneyCount;
     static int runningTotal;
     static float percentWon;
-    // Open scanner
-    static Scanner scan = new Scanner(System.in);
+
     // Create DecimalFormat for floats
-    private static DecimalFormat df = new DecimalFormat("0.00");
+    private static final DecimalFormat df = new DecimalFormat("0.00");
 
     public static void main(String[] args) throws IOException {
 
-        int numberOfSlots = getRouletteSlots();
+        int numberOfSlots = getRouletteSlots(); // Obtain our numbers needed from the user and store them for showing statistics later
         initialSlots = numberOfSlots;
         int numberOfZeroes = getZeroes();
         initialZeroes = numberOfZeroes;
@@ -50,17 +49,17 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
         initialVisits = numberOfVisits;
         int numberOfDollarsPerVisit = getDollars();
         initialDollars = numberOfDollarsPerVisit;
-        dollarsRisked = numberOfVisits * numberOfDollarsPerVisit; // Rubric says "(N times the dollars at the start of each visit)" so I think this is what he means
+        dollarsRisked = numberOfVisits * numberOfDollarsPerVisit;
 
         boolean retry = true;
-        gambleMenu();
+        gambleMenu(); // Show our menu for different betting strategies
         do {
             try {
+                Scanner scan = new Scanner(System.in);
                 int inputNumber = scan.nextInt();
 
-                switch (inputNumber) {
+                switch (inputNumber) { // Switch case depending on which betting style you choose
                     case 1:
-
                         for (int currentVisits = 0; currentVisits < numberOfVisits; currentVisits++) {
 
                             // Calls Martingale strategy and assigns to variable
@@ -73,7 +72,8 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                                 runningTotal++;
                             } else {
                                 lossCount++;
-                                runningTotal--;
+                                completeLoss++;
+                                runningTotal = runningTotal - initialDollars;
                             }
 
                         }
@@ -81,8 +81,6 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                         if (winCount > 0) {
                             biggestGain = 1;
                             largestWalkedAway = 1;
-                        } else {
-                            completeLoss = 1;
                         }
                         retry = false;
                         break;
@@ -97,23 +95,23 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                             getLargestWalkedAway(money);
 
                             // If user is ahead on visit, adds to variables used for statistics
-                            if (money > 0) {
-                                moneyCount = moneyCount + money;
+                            if (money > initialDollars) {
+                                moneyCount = moneyCount + money - initialDollars;
                                 winCount++;
-                                runningTotal = runningTotal + money;
-                            // Checks if they broke even
+                                runningTotal = runningTotal + money - initialDollars;
+                                // Checks if they broke even
                             } else if (money == initialDollars) {
                                 brokeEven++;
-                            // If user went broke on visit, adds to variables used for statistics
+                                // If user went broke on visit, adds to variables used for statistics
                             } else {
                                 lossCount++;
                                 runningTotal = runningTotal - initialDollars;
+                                if (money == 0) {
+                                    completeLoss++;
+                                }
                             }
                         }
-                        // Checks if the user never walked away a winner
-                        if (winCount == 0) {
-                            completeLoss = 1;
-                        }
+
                         // Creates a percentage of winnings versus total money brought across all visits
                         percentWon = (float) moneyCount / dollarsRisked * 100;
                         retry = false;
@@ -129,10 +127,10 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                             getLargestWalkedAway(money);
 
                             // If user is ahead on visit, adds to variables used for statistics
-                            if (money > 0) {
-                                moneyCount = moneyCount + money;
+                            if (money > initialDollars) {
+                                moneyCount = moneyCount + money - initialDollars;
                                 winCount++;
-                                runningTotal = runningTotal + money;
+                                runningTotal = runningTotal + money - initialDollars;
                                 // Checks if they broke even
                             } else if (money == initialDollars) {
                                 brokeEven++;
@@ -140,12 +138,12 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                             } else {
                                 lossCount++;
                                 runningTotal = runningTotal - initialDollars;
+                                if (money == 0) {
+                                    completeLoss++;
+                                }
                             }
                         }
-                        // Checks if the user never walked away a winner
-                        if (winCount == 0) {
-                            completeLoss = 1;
-                        }
+
                         // Creates a percentage of winnings versus total money brought across all visits
                         percentWon = (float) moneyCount / dollarsRisked * 100;
                         retry = false;
@@ -167,15 +165,13 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
 
         // Function call to show final statistics
         showStatistics();
-        // Close scanner
-        scan.close();
     }
 
     static int getRouletteSlots() {
         boolean retry = true;
         int rouletteSlots = 0;
 
-        do {
+        do { // Try to get the number of slots that will be used in out bets
             try {
                 System.out.println("Enter a number for Roulette Slots on the Wheel (between 2-200 inclusive): ");
                 Scanner scan = new Scanner(System.in);
@@ -184,10 +180,10 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                 if (1 < rouletteSlots && rouletteSlots < 201) {
                     retry = false;
 
-                } else {
+                } else { // In case we are out of range for the allowed number of slots
                     System.out.print("Please pick a number larger than 1 and smaller than 201! \n");
                 }
-            } catch (InputMismatchException ex) {
+            } catch (InputMismatchException ex) { // Check for illegal inputs such as characters or special characters
                 System.out.println("Special characters and alphabetic characters are invalid inputs!");
             }
         } while (retry);
@@ -199,7 +195,7 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
         boolean retry = true;
         int numberOfZeroes = 0;
 
-        do {
+        do { // Try to get the number of zeroes that will be used in out bets
             try {
                 System.out.println("Enter a number for zeroes labeled in the slots (between 0-2 inclusive): ");
                 Scanner scan = new Scanner(System.in);
@@ -211,10 +207,10 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                             "Please choose a number smaller than the number of slots on the wheel");
                 } else if (-1 < numberOfZeroes && numberOfZeroes < 3) {
                     retry = false;
-                } else {
+                } else { // In case we are out of range for the allowed number of zeroes
                     System.out.print("Please pick a number larger than -1 and smaller than 3! \n");
                 }
-            } catch (InputMismatchException ex) {
+            } catch (InputMismatchException ex) { // Check for illegal inputs such as characters or special characters
                 System.out.println("Special characters and alphabetic characters are invalid inputs!");
             }
 
@@ -227,7 +223,7 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
         boolean retry = true;
         int casinoVisits = 0;
 
-        do {
+        do { // Try to get the number of visits that will be conducted at the casino
             try {
                 System.out.println("Enter a number of visits to the casino (between 1-100,000 inclusive): ");
                 Scanner scan = new Scanner(System.in);
@@ -236,10 +232,10 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                 if (0 < casinoVisits && casinoVisits < 100001) {
                     retry = false;
 
-                } else {
+                } else { // In case we are out of range for the allowed number of visits
                     System.out.print("Please pick a number larger than 0 and smaller than 100,001! \n");
                 }
-            } catch (InputMismatchException ex) {
+            } catch (InputMismatchException ex) { // Check for illegal inputs such as characters or special characters
                 System.out.println("Special characters and alphabetic characters are invalid inputs!");
             }
         } while (retry);
@@ -251,7 +247,7 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
         boolean retry = true;
         int numberOfDollars = 0;
 
-        do {
+        do { // Try to get the number of dollars to start off with for each visit
             try {
                 System.out.println("Enter a number of dollars for each visit (between 1-1,000,000 inclusive): ");
                 Scanner scan = new Scanner(System.in);
@@ -260,10 +256,10 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                 if (0 < numberOfDollars && numberOfDollars < 1000001) {
                     retry = false;
 
-                } else {
+                } else { // In case we are out of range for the allowed number of dollars
                     System.out.print("Please pick a number larger than 0 and smaller than 1,000,001! \n");
                 }
-            } catch (InputMismatchException ex) {
+            } catch (InputMismatchException ex) { // Check for illegal inputs such as characters or special characters
                 System.out.println("Special characters and alphabetic characters are invalid inputs!");
             }
         } while (retry);
@@ -283,18 +279,18 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
         int moneyLeft = money;
         int currentBet = bet;
         // Random number generator for spin within the bounds of number of slots chosen
-        int random = ThreadLocalRandom.current().nextInt(min, max + 1);
+        int random;
 
         do {
             // If number is odd or hits one of the zero slots, it is a loss and money is adjusted, bet doubled, and function called with new arguments and spins again
+            random = ThreadLocalRandom.current().nextInt(min, max + 1);
             if (random % 2 == 1 || random <= zeroSlots) {
                 moneyLeft = moneyLeft - currentBet;
                 currentBet = currentBet * 2;
-                rouletteSpinMartingale(slots, zeroes, moneyLeft, currentBet);
             } else {
                 win++;
             }
-        // Continues do/while loop if user hasn't won and can still double bet
+            // Continues do/while loop if user hasn't won and can still double bet
         } while (win < 1 && moneyLeft > currentBet);
 
         // Returns a 1 for win or 0 if the user went broke
@@ -331,7 +327,7 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
                 getBiggestGain(currentBet);
             }
             timesSpun++;
-        // Continues do/while loop if user has money left and they haven't reached 50 spins yet
+            // Continues do/while loop if user has money left and they haven't reached 50 spins yet
         } while (moneyLeft > 0 && timesSpun <= 50);
         // Returns the amount of money left after the user went broke or 50 spins, whichever comes first
         return moneyLeft;
@@ -351,34 +347,40 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
             // Generates a random number for the spin within the bounds of number of slots chosen
             int random = ThreadLocalRandom.current().nextInt(min, max + 1);
             int currentBet = 0;
-            boolean retry= true;
+            boolean retry = true;
             // While loop that takes user input for bet amount and validates user input
             while (retry) {
                 try {
+                    retry = false;
                     System.out.println("Enter the amount you would like to bet. It can't be larger than your current amount of $" + moneyLeft);
+                    Scanner scan = new Scanner(System.in);
                     currentBet = scan.nextInt();
                     if (currentBet > moneyLeft) {
                         System.out.println("You don't have that much money!");
-                    } else {
-                       retry = false;
+                        retry = true;
+                    } else if (currentBet <= 0) {
+                        System.out.println("You must bet some money!");
+                        retry = true;
                     }
                 } catch (InputMismatchException ex) { // Our try catch block in case a different input is used
                     System.out.println("Special characters and alphabetic characters are invalid inputs!");
+                    retry = true;
                 }
             }
             // If number is odd or hits one of the zero slots, it is a loss and money is adjusted. User is updated of loss and current money left
             if (random % 2 == 1 || random <= zeroSlots) {
                 moneyLeft = moneyLeft - currentBet;
                 System.out.println("Sorry, you lost. You have $" + moneyLeft + " left.");
-            // Win and money is adjusted. User is updated of win and current money left
+                // Win and money is adjusted. User is updated of win and current money left
             } else {
                 moneyLeft = (moneyLeft - currentBet) + currentBet * 2;
                 getBiggestGain(currentBet);
                 System.out.println("You won! You have $" + moneyLeft + " left.");
             }
             timesSpun++;
-        // Continues do/while loop if user has money left and they haven't reached 50 spins yet
+            // Continues do/while loop if user has money left and they haven't reached 50 spins yet
         } while (moneyLeft > 0 && timesSpun <= 50);
+        System.out.println("Please come again!");
         // Returns the amount of money left after the user went broke or 50 spins, whichever comes first
         return moneyLeft;
     }
@@ -419,10 +421,10 @@ public class SoftwareHW2 { // Going to have to change this to Main and delete th
         } else {
             System.out.println("The most you ever walked away with on a visit to the casino was $" + largestWalkedAway + ".");
         }
-        System.out.println("You lost all your money " + lossCount + " times out of your " + initialVisits + " visits." );
+        System.out.println("You came out a loser " + lossCount + " times out of your " + initialVisits + " visits." );
         // Prints to console only if the user never won once on all their visits to the casino
-        if (completeLoss == 1) {
-            System.out.println("You completely lost all your $" +dollarsRisked + " and never once walked away a winner on any of your visits.");
+        if (completeLoss >= 1) {
+            System.out.println("You completely lost all of your money in " + completeLoss + " visits.");
         }
         // Gives the user of their average winnings/losses per visit of the casino
         System.out.println("You won an average of $" + df.format(((float)runningTotal / initialVisits))+ " each time you visited the casino.");
