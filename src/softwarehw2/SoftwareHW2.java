@@ -25,16 +25,16 @@ public class Main { // Going to have to change this to Main and delete the packa
     static int initialZeroes;
     static int initialVisits;
     static int initialDollars;
-    static int dollarsRisked;
-    static int biggestGain = 0; // Default in case no one wins, check each win to see if it is a bigger gain
-    static int largestWalkedAway;
+    static long dollarsRisked;
+    static long biggestGain = 0; // Default in case no one wins, check each win to see if it is a bigger gain
+    static long largestWalkedAway;
     static int lossCount;
     static int winCount;
     static int completeLoss;
     static int brokeEven;
-    static int moneyCount;
-    static int runningTotal;
-    static float percentWon;
+    static long moneyCount;
+    static long runningTotal;
+    static double percentWon;
 
     // Create DecimalFormat for floats
     private static final DecimalFormat df = new DecimalFormat("0.00");
@@ -49,21 +49,23 @@ public class Main { // Going to have to change this to Main and delete the packa
         initialVisits = numberOfVisits;
         int numberOfDollarsPerVisit = getDollars();
         initialDollars = numberOfDollarsPerVisit;
-        dollarsRisked = numberOfVisits * numberOfDollarsPerVisit;
+        dollarsRisked = (long) numberOfVisits * numberOfDollarsPerVisit;
 
         boolean retry = true;
         gambleMenu(); // Show our menu for different betting strategies
+        Scanner scan = new Scanner(System.in);
         do {
             try {
-                Scanner scan = new Scanner(System.in);
                 int inputNumber = scan.nextInt();
 
                 switch (inputNumber) { // Switch case depending on which betting style you choose
                     case 1:
+                        moneyCount = dollarsRisked;
                         for (int currentVisits = 0; currentVisits < numberOfVisits; currentVisits++) {
 
                             // Calls Martingale strategy and assigns to variable
-                            int roll = rouletteSpinMartingale(initialSlots, initialZeroes, initialDollars, 1);
+                            long roll = rouletteSpinMartingale(initialSlots, initialZeroes, initialDollars, 1);
+                            // int roll = ThreadLocalRandom.current().nextInt(0, 1 + 1);
 
                             // Check for a win and adjusts counts and total used for statistics
                             if (roll == 1) {
@@ -72,6 +74,7 @@ public class Main { // Going to have to change this to Main and delete the packa
                                 runningTotal++;
                             } else {
                                 lossCount++;
+                                moneyCount = moneyCount - initialDollars;
                                 completeLoss++;
                                 runningTotal = runningTotal - initialDollars;
                             }
@@ -82,6 +85,7 @@ public class Main { // Going to have to change this to Main and delete the packa
                             biggestGain = 1;
                             largestWalkedAway = 1;
                         }
+                        percentWon = (double) moneyCount / dollarsRisked * 100;
                         retry = false;
                         break;
 
@@ -89,21 +93,23 @@ public class Main { // Going to have to change this to Main and delete the packa
                         for (int currentVisits = 0; currentVisits < numberOfVisits; currentVisits++) {
 
                             // Calls random strategy and assigns returned money amount to variable
-                            int money = rouletteSpinRandom(initialSlots, initialZeroes, initialDollars);
+                            long money = rouletteSpinRandom(initialSlots, initialZeroes, initialDollars);
 
                             // Function call to pass amount won after a visit into a total used for statistics
                             getLargestWalkedAway(money);
 
                             // If user is ahead on visit, adds to variables used for statistics
                             if (money > initialDollars) {
-                                moneyCount = moneyCount + money - initialDollars;
+                                moneyCount = moneyCount + money;
                                 winCount++;
                                 runningTotal = runningTotal + money - initialDollars;
                                 // Checks if they broke even
                             } else if (money == initialDollars) {
+                                moneyCount = moneyCount + money;
                                 brokeEven++;
                                 // If user went broke on visit, adds to variables used for statistics
                             } else {
+                                moneyCount = moneyCount + money;
                                 lossCount++;
                                 runningTotal = runningTotal - initialDollars;
                                 if (money == 0) {
@@ -113,7 +119,7 @@ public class Main { // Going to have to change this to Main and delete the packa
                         }
 
                         // Creates a percentage of winnings versus total money brought across all visits
-                        percentWon = (float) moneyCount / dollarsRisked * 100;
+                        percentWon = (double) moneyCount / dollarsRisked * 100;
                         retry = false;
                         break;
 
@@ -121,23 +127,25 @@ public class Main { // Going to have to change this to Main and delete the packa
                         for (int currentVisits = 0; currentVisits < numberOfVisits; currentVisits++) {
 
                             // Calls random strategy and assigns returned money amount to variable
-                            int money = rouletteSpinFixed(initialSlots, initialZeroes, initialDollars);
+                            long money = rouletteSpinFixed(initialSlots, initialZeroes, initialDollars);
 
                             // Function call to pass amount won after a visit into a total used for statistics
                             getLargestWalkedAway(money);
 
                             // If user is ahead on visit, adds to variables used for statistics
                             if (money > initialDollars) {
-                                moneyCount = moneyCount + money - initialDollars;
+                                moneyCount = moneyCount + money;
                                 winCount++;
                                 runningTotal = runningTotal + money - initialDollars;
                                 // Checks if they broke even
                             } else if (money == initialDollars) {
+                                moneyCount = moneyCount + money;
                                 brokeEven++;
                                 // If user went broke on visit, adds to variables used for statistics
                             } else {
                                 lossCount++;
-                                runningTotal = runningTotal - initialDollars;
+                                moneyCount = moneyCount + money;
+                                runningTotal = runningTotal - (initialDollars - money);
                                 if (money == 0) {
                                     completeLoss++;
                                 }
@@ -145,7 +153,7 @@ public class Main { // Going to have to change this to Main and delete the packa
                         }
 
                         // Creates a percentage of winnings versus total money brought across all visits
-                        percentWon = (float) moneyCount / dollarsRisked * 100;
+                        percentWon = (double) moneyCount / dollarsRisked * 100;
                         retry = false;
                         break;
 
@@ -159,12 +167,12 @@ public class Main { // Going to have to change this to Main and delete the packa
             } catch (InputMismatchException ex) { // Our try catch block in case a different input is used
                 System.out.println("Special characters and alphabetic characters are invalid inputs!");
                 gambleMenu();
-
             }
         } while (retry);
 
         // Function call to show final statistics
         showStatistics();
+        scan.close();
     }
 
     static int getRouletteSlots() {
@@ -268,7 +276,7 @@ public class Main { // Going to have to change this to Main and delete the packa
     }
 
     // Function that employs the Martingale betting strategy
-    static int rouletteSpinMartingale(int slots, int zeroes, int money, int bet) {
+    static int rouletteSpinMartingale(int slots, int zeroes, long money, int bet) {
 
         // Initialize variables
         int min = 1;
@@ -276,8 +284,8 @@ public class Main { // Going to have to change this to Main and delete the packa
         // Assigns number of 0s or 00s to the beginning of the wheel
         int zeroSlots = zeroes;
         int win = 0;
-        int moneyLeft = money;
-        int currentBet = bet;
+        long moneyLeft = money;
+        long currentBet = bet;
         // Random number generator for spin within the bounds of number of slots chosen
         int random;
 
@@ -303,21 +311,21 @@ public class Main { // Going to have to change this to Main and delete the packa
     }
 
     // Function that employs the Random betting strategy
-    static int rouletteSpinRandom(int slots, int zeroes, int money) {
+    static long rouletteSpinRandom(int slots, int zeroes, long money) {
 
         // Initialize variables
         int min = 1;
         int max = slots;
         // Assigns number of 0s or 00s to the beginning of the wheel
         int zeroSlots = zeroes;
-        int moneyLeft = money;
+        long moneyLeft = money;
         int timesSpun = 0;
 
         do {
             // Generates a random number for spin within the bounds of number of slots chosen
             int random = ThreadLocalRandom.current().nextInt(min, max + 1);
             // Generates a random amount of money from user's current money pool
-            int currentBet = ThreadLocalRandom.current().nextInt(min, moneyLeft + 1);
+            long currentBet = ThreadLocalRandom.current().nextLong(min, moneyLeft + 1);
             // If number is odd or hits one of the zero slots, it is a loss and money is adjusted, else its a win and money is adjusted
             if (random % 2 == 1 || random <= zeroSlots) {
                 moneyLeft = moneyLeft - currentBet;
@@ -333,20 +341,20 @@ public class Main { // Going to have to change this to Main and delete the packa
         return moneyLeft;
     }
 
-    static int rouletteSpinFixed(int slots, int zeroes, int money) {
+    static long rouletteSpinFixed(int slots, int zeroes, long money) {
 
         // Initialize variables
         int min = 1;
         int max = slots;
         // Assigns number of 0s or 00s to the beginning of the wheel
         int zeroSlots = zeroes;
-        int moneyLeft = money;
+        long moneyLeft = money;
         int timesSpun = 0;
 
         do {
             // Generates a random number for the spin within the bounds of number of slots chosen
             int random = ThreadLocalRandom.current().nextInt(min, max + 1);
-            int currentBet = 0;
+            long currentBet = 0;
             boolean retry = true;
             // While loop that takes user input for bet amount and validates user input
             while (retry) {
@@ -386,13 +394,13 @@ public class Main { // Going to have to change this to Main and delete the packa
     }
 
     // Function to keep track of the largest win on a single bet
-    static void getBiggestGain(int gain) {
+    static void getBiggestGain(long gain) {
         if (gain > biggestGain) {
             biggestGain = gain;
         }
     }
     // Function to keep track of the largest amount a user walked away with from a casino visit
-    static void getLargestWalkedAway(int amount) {
+    static void getLargestWalkedAway(long amount) {
         if (amount > largestWalkedAway) {
             largestWalkedAway = amount;
         }
@@ -412,7 +420,7 @@ public class Main { // Going to have to change this to Main and delete the packa
         System.out.println("You entered " + initialVisits + " for the number of times you visited to the casino.");
         System.out.println("You entered $" + initialDollars + " for the amount of money you started with at every visit to the casino.");
         System.out.println("You had $" + dollarsRisked + " for the total amount of money you brought to the casino over your visits.");
-        System.out.println("You walked away with $" + moneyCount + " total over " + winCount + " of your " + initialVisits + " visits. This was %" + df.format(percentWon) +
+        System.out.println("You walked away with $" + moneyCount + " total over " + winCount + " wins of your " + initialVisits + " total visits. This is %" + df.format(percentWon) +
                 " of the $" + dollarsRisked + " you brought to the casino.");
         System.out.println("Your most money won on a spin was $" + biggestGain + " across all your visits.");
         // Prints to console if the user never won once on all their visits to the casino, otherwise lets them know the largest amount they walked away with
